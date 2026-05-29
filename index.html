@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Kod Oluşturucu</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        input[type="text"],
+        input[type="color"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="color"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .color-picker-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .color-picker-container input[type="color"] {
+            width: 50px;
+            height: 50px;
+            padding: 3px;
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+
+        .color-picker-container span {
+            flex-grow: 1;
+            text-align: right;
+            color: #999;
+            font-size: 13px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .button-group button {
+            margin-bottom: 0;
+        }
+
+        #qrcode {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid #e0e0e0;
+            display: none;
+            text-align: center;
+        }
+
+        #qrcode.show {
+            display: block;
+        }
+
+        #qrcode canvas {
+            max-width: 100%;
+            border-radius: 10px;
+            border: 2px solid #f0f0f0;
+        }
+
+        .download-btn {
+            background: #4CAF50;
+            display: none;
+            margin-top: 15px;
+        }
+
+        .download-btn:hover {
+            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .download-btn.show {
+            display: block;
+        }
+
+        .info-text {
+            color: #999;
+            font-size: 12px;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .row .form-group {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>🔲 QR Kod Oluşturucu</h2>
+
+    <div class="form-group">
+        <label for="text">İçerik (URL veya Metin)</label>
+        <input type="text" id="text" placeholder="https://www.google.com" value="https://www.google.com">
+    </div>
+
+    <div class="row">
+        <div class="form-group">
+            <label for="colorDark">Koyu Renk</label>
+            <input type="color" id="colorDark" value="#000000">
+        </div>
+        <div class="form-group">
+            <label for="colorLight">Açık Renk</label>
+            <input type="color" id="colorLight" value="#ffffff">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group">
+            <label for="size">Boyut</label>
+            <select id="size">
+                <option value="128">Küçük (128px)</option>
+                <option value="256" selected>Orta (256px)</option>
+                <option value="384">Büyük (384px)</option>
+                <option value="512">Çok Büyük (512px)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="correctLevel">Hata Düzeltme</label>
+            <select id="correctLevel">
+                <option value="L">Düşük (7%)</option>
+                <option value="M">Orta (15%)</option>
+                <option value="Q" selected>Yüksek (25%)</option>
+                <option value="H">Çok Yüksek (30%)</option>
+            </select>
+        </div>
+    </div>
+
+    <button onclick="updateQRCode()">✨ QR Kod Güncelle</button>
+
+    <div id="qrcode"></div>
+
+    <div class="button-group">
+        <button class="download-btn" id="downloadBtn" onclick="downloadQR()">📥 İndir</button>
+        <button class="download-btn" id="copyBtn" onclick="copyToClipboard()" style="background: #2196F3;">📋 Kopyala</button>
+    </div>
+
+    <p class="info-text">
+        ✓ İçeriği girin ve "QR Kod Güncelle" butonuna tıklayın<br>
+        ✓ Renkleri istediğiniz gibi özelleştirebilirsiniz<br>
+        ✓ QR kodu indirip paylaşabilirsiniz
+    </p>
+</div>
+
+<script>
+    let currentQRImage = null;
+
+    function updateQRCode() {
+        var text = document.getElementById("text").value.trim();
+        
+        if (!text) {
+            alert("Lütfen bir içerik girin!");
+            return;
+        }
+
+        var colorDark = document.getElementById("colorDark").value;
+        var colorLight = document.getElementById("colorLight").value;
+        var size = parseInt(document.getElementById("size").value);
+        var correctLevel = document.getElementById("correctLevel").value;
+
+        // Önceki kodu temizle
+        document.getElementById("qrcode").innerHTML = "";
+
+        // Yeniden oluştur
+        new QRCode(document.getElementById("qrcode"), {
+            text: text,
+            width: size,
+            height: size,
+            colorDark: colorDark,
+            colorLight: colorLight,
+            correctLevel: QRCode.CorrectLevel[correctLevel]
+        });
+
+        // QR kodu göster
+        document.getElementById("qrcode").classList.add("show");
+        document.getElementById("downloadBtn").classList.add("show");
+        document.getElementById("copyBtn").classList.add("show");
+
+        // Resmi kaydet (indirme için)
+        setTimeout(() => {
+            var canvas = document.querySelector("#qrcode canvas");
+            if (canvas) {
+                currentQRImage = canvas.toDataURL("image/png");
+            }
+        }, 100);
+    }
+
+    function downloadQR() {
+        if (!currentQRImage) {
+            alert("Lütfen önce QR kod oluşturun!");
+            return;
+        }
+
+        var link = document.createElement("a");
+        link.href = currentQRImage;
+        link.download = "qr-code.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function copyToClipboard() {
+        var canvas = document.querySelector("#qrcode canvas");
+        if (!canvas) {
+            alert("Lütfen önce QR kod oluşturun!");
+            return;
+        }
+
+        canvas.toBlob(blob => {
+            navigator.clipboard.write([
+                new ClipboardItem({ "image/png": blob })
+            ]).then(() => {
+                alert("QR kod panoya kopyalandı!");
+            }).catch(err => {
+                alert("Kopyalama başarısız: " + err);
+            });
+        });
+    }
+
+    // Enter tuşu ile güncelle
+    document.getElementById("text").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            updateQRCode();
+        }
+    });
+
+    // İlk yüklemede QR kod oluştur
+    window.addEventListener("load", function() {
+        updateQRCode();
+    });
+</script>
+</body>
+</html>
